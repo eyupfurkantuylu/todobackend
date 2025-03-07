@@ -18,13 +18,12 @@ Bu proje, kullanıcıların kişisel todo listlerini yönetebilecekleri güvenli
 
 ## 2. Sistem Mimarisi
 
-### 2.1 Katmanlı Mimari
+### 2.1 Klasör Yapısı
 
-- Presentation Layer (API)
-- Business Layer (Service)
-- Data Access Layer
-- Domain Layer
-- Infrastructure Layer
+- Controllers
+- Dtos
+- Models
+- Services
 
 ### 2.2 Veritabanı Şeması
 
