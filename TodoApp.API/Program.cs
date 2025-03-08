@@ -5,6 +5,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.AspNetIdentity;
 using TodoApp.API.Models.Identity;
 using TodoApp.API.Services.TodoListService;
+using TodoApp.API.Services.TodoItemService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddAuthorization();
 
 // Dependency Injection
 builder.Services.AddScoped<ITodoListService, TodoListService>();
+builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 builder.Services.AddScoped<DatabaseSeeder>();
 
 // Add Entity Framework Core
