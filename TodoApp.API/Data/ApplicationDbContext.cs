@@ -9,6 +9,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<TodoItems> TodoItems { get; set; }
     public DbSet<TodoList> TodoLists { get; set; }
     public DbSet<Settings> Settings { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -38,6 +39,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne<ApplicationUser>()
             .WithOne()
             .HasForeignKey<Settings>("UserId")
+            .IsRequired();
+
+        // RefreshToken - User ilişkisi
+        builder.Entity<RefreshToken>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
             .IsRequired();
     }
 } 
