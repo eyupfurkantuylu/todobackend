@@ -9,6 +9,12 @@ Bu proje, .NET 9.0 kullanılarak geliştirilmiş bir Todo uygulaması API'sidir.
 - Bir IDE (Visual Studio, Visual Studio Code, JetBrains Rider vb.)
 - Docker ve Docker Compose (opsiyonel)
 
+## YouTube Canlı Yayını
+
+```bash
+https://www.youtube.com/live/KN_gvDm9N8A
+```
+
 ## Yerel Kurulum
 
 ### 1. Projeyi Klonlama
