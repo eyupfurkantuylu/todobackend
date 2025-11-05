@@ -132,10 +132,5 @@ public class AuthController : ControllerBase
         });
     }
 
-    [HttpGet("is-valid-user")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public async Task<IActionResult> IsValidUser()
-    {
-        return Ok();
-    }
+
 }
