@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +32,7 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var user = new ApplicationUser { Email = model.Email };
+        var user = new ApplicationUser { Email = model.Email, UserName = model.Email };
         var result = await _userManager.CreateAsync(user, model.Password);
 
         if (!result.Succeeded)
@@ -111,18 +110,19 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("me")]
+    [Authorize]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
-        // Token'daki "email" claim'ini al
-        var email = User.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+        // "email" claim'ini kullan (ClaimTypes.Email yerine)
+        var email = User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
 
         if (string.IsNullOrEmpty(email))
-            return Unauthorized("Email claim bulunamadı.");
+            return Unauthorized(new { message = "Email claim bulunamadı." });
 
         var user = await _userManager.FindByEmailAsync(email);
 
         if (user == null)
-            return NotFound();
+            return NotFound(new { message = "Kullanıcı bulunamadı." });
 
         return Ok(new UserDto
         {
@@ -131,9 +131,11 @@ public class AuthController : ControllerBase
             UserName = user.UserName!
         });
     }
-    [HttpGet("whoiam")]
-    public async Task<IActionResult> GetUser()
+
+    [HttpGet("is-valid-user")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<IActionResult> IsValidUser()
     {
-        return Ok("Its work");
+        return Ok();
     }
 }
