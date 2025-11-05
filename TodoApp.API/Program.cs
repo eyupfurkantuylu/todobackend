@@ -14,6 +14,7 @@ using TodoApp.API.Services.Interfaces;
 using TodoApp.API.Services.TodoListService;
 using TodoApp.API.Services.TodoItemService;
 using TodoApp.API.Services.SettingsServices;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,10 +32,10 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "Todo API", 
-        Version = "v1" 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Todo API",
+        Version = "v1"
     });
 
     // JWT authentication için Swagger yapılandırması
@@ -63,6 +64,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 // JWT Authentication yapılandırması
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 var key = Encoding.ASCII.GetBytes(jwtSettings?.SecretKey ?? throw new InvalidOperationException("JWT Secret key is not configured"));
@@ -74,7 +77,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Production'da true yapılmalı
+    options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -85,6 +88,21 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings.Issuer,
         ValidAudience = jwtSettings.Audience,
         ClockSkew = TimeSpan.Zero
+    };
+
+    // Debug için event ekleyin
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("Token validated successfully");
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -97,6 +115,7 @@ builder.Services.AddScoped<ITodoListService, TodoListService>();
 builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 builder.Services.AddScoped<ISettingService, SettingService>();
 builder.Services.AddScoped<DatabaseSeeder>();
+builder.Services.AddScoped<DapperDbContext>();
 
 // Add Entity Framework Core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -119,25 +138,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Add IdentityServer
-builder.Services.AddIdentityServer()
-    .AddInMemoryApiScopes(new List<ApiScope>
-    {
-        new ApiScope("TodoAPI", "Todo API")
-    })
-    .AddInMemoryClients(new List<Client>
-    {
-        new Client
-        {
-            ClientId = "client",
-            AllowedGrantTypes = GrantTypes.ClientCredentials,
-            ClientSecrets = { new Secret("secret".Sha256()) },
-            AllowedScopes = { "TodoAPI" }
-        }
-    })
-    .AddAspNetIdentity<ApplicationUser>();
 
-builder.Services.AddSingleton<DapperDbContext>();
 
 var app = builder.Build();
 
@@ -149,7 +150,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
-        
+
         var seeder = services.GetRequiredService<DatabaseSeeder>();
         await seeder.SeedAsync();
     }
@@ -178,9 +179,8 @@ app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader());
 
-// Add IdentityServer middleware
-app.UseIdentityServer();
 
+// Authentication ve Authorization MUTLAKA bu sırada olmalı
 app.UseAuthentication();
 app.UseAuthorization();
 

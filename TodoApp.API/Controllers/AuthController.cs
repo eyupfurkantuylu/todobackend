@@ -110,11 +110,17 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-    [Authorize]
     [HttpGet("me")]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
-        var user = await _userManager.FindByEmailAsync(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!);
+        // Token'daki "email" claim'ini al
+        var email = User.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+
+        if (string.IsNullOrEmpty(email))
+            return Unauthorized("Email claim bulunamadı.");
+
+        var user = await _userManager.FindByEmailAsync(email);
+
         if (user == null)
             return NotFound();
 
@@ -125,4 +131,9 @@ public class AuthController : ControllerBase
             UserName = user.UserName!
         });
     }
-} 
+    [HttpGet("whoiam")]
+    public async Task<IActionResult> GetUser()
+    {
+        return Ok("Its work");
+    }
+}

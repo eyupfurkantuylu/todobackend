@@ -38,7 +38,7 @@ public class TokenService : ITokenService
             throw new SecurityTokenException("Geçersiz access token");
         }
 
-        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = principal.FindFirst("nameid")?.Value;
         if (userId == null)
         {
             throw new SecurityTokenException("Kullanıcı ID'si bulunamadı");
@@ -114,11 +114,11 @@ public class TokenService : ITokenService
         var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
 
         var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty)
-        };
+    {
+        new Claim("nameid", user.Id),
+        new Claim("email", user.Email ?? string.Empty),
+        new Claim("unique_name", user.UserName ?? string.Empty)
+    };
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -181,4 +181,4 @@ public class TokenService : ITokenService
             return null;
         }
     }
-} 
+}
