@@ -13,5 +13,6 @@ namespace TodoApp.API.Services.TodoListService
         Task<GetTodoListDto> CreateTodoListAsync(CreateTodoListDto todoList);
         Task<GetTodoListDto> UpdateTodoListAsync(UpdateTodoListDto todoList);
         Task<bool> DeleteTodoListAsync(string id);
+        Task<List<GetTodoListDto>> GetTodoListWithUserIdAsync(string userId);
     }
 }

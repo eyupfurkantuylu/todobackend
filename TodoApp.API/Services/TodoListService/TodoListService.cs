@@ -61,6 +61,17 @@ namespace TodoApp.API.Services.TodoListService
             }
         }
 
+        public async Task<List<GetTodoListDto>> GetTodoListWithUserIdAsync(string userId)
+        {
+            var query = "SELECT * FROM TodoLists WHERE UserId = @UserId";
+
+            using (var connection = _context.CreateConnection())
+            {
+                var todoLists = await connection.QueryAsync<GetTodoListDto>(query, new { UserId = userId });
+                return todoLists.ToList();
+            }
+        }
+
         public async Task<GetTodoListDto> GetTodoListByIdAsync(string id)
         {
             var query = "SELECT * FROM TodoLists WHERE Id = @Id";
@@ -83,7 +94,7 @@ namespace TodoApp.API.Services.TodoListService
             parameters.Add("Title", todoList.Title);
             parameters.Add("IsHidden", todoList.IsHidden);
             parameters.Add("Id", todoList.Id);
-         
+
 
             using (var connection = _context.CreateConnection())
             {

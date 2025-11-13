@@ -5,6 +5,6 @@ namespace TodoApp.API.Dtos.TodoListDtos
         public string Title { get; set; }
         public bool IsHidden { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
     }
-} 
+}
